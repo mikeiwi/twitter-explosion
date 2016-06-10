@@ -7,12 +7,19 @@ from connect import twitter_connect
 
 api = twitter_connect()
 
-c = tweepy.Cursor(api.search, q='#SIGUEMEYTESIGO')
+count = 1
+c = tweepy.Cursor(api.search, q='#viernesdeganarseguidores')
 for tweet in c.items():
     tweet = tweet._json
     if "retweeted_status" not in tweet:
         print(tweet['text'].encode('utf-8'))
-        print(tweet['user']['id'])
         print(tweet['user']['screen_name'])
-        break
-        #api.create_friendship(tweet['user']['id'])
+        friendship = api.show_friendship(
+            target_screen_name=tweet['user']['screen_name'])
+        if not friendship[0].following and not friendship[0].followed_by:
+            api.create_friendship(tweet['user']['id'])
+            print("---followed: {} !!!!!!".format(tweet['user']['screen_name']))
+            count += 1
+
+        if count == 50:
+            break
